@@ -1,5 +1,8 @@
 name: MiniTest
 on: [push, pull_request]
+permissions:
+  contents: read
+
 jobs:
   minitest:
     strategy:
@@ -45,11 +48,16 @@ jobs:
             gemfile: rails_next
     runs-on: ubuntu-latest
     steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit # Audit network and disk activity
+
       - name: Install libvips
         run: sudo apt-get update && sudo apt-get -y install libvips
 
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2.8.0
 
       - name: Set BUNDLE_GEMFILE
         run: echo 'BUNDLE_GEMFILE=${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile' >> $GITHUB_ENV
@@ -58,7 +66,7 @@ jobs:
         run: echo 'IMAGE_PROCESSOR=${{ matrix.image_processor }}' >> $GITHUB_ENV
 
       - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
